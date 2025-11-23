@@ -1,4 +1,6 @@
-# A függvények input paraméterben kovariánsak, az output paraméterben pedig kontravariánsak.
+# Function types behave in a special way:
+# - They are *contravariant* in their input parameter.
+# - They are *covariant* in their output parameter.
 from typing import Callable
 
 class Complex:
@@ -32,33 +34,57 @@ def call(func: Callable[[Integer], Rational], arg: Integer) -> Rational:
     return func(arg)
 
 
-# Call function-nek van egy függvény paramétere ami I->R, itt feltehetjük a kérdésst mivel lehet helyetetsíteni ezt a függvényt? mi az ő altípusa?
-call(floor, Integer(5)) # A floor egy R->I függvény, mégis helyes!
+# The 'call' function expects a function of type Integer -> Rational.
+# Surprisingly, we can pass 'floor', which has type Rational -> Integer.
+call(floor, Integer(5))  # Works, even though the types seem reversed!
 
-# Tudjuk hogy I <: R, a függvények input paraméterben kontravariáns míg output paraméterben kovariáns, tehát:
-# floor : R -> I 
-# paraméterként egy I -> R függvényt várunk
-# Kontravariancia miatt input paraméterben az ős helyettesítheti az utódát, míg output paraméterben az utód helyettesítheti az ősét
-# R -> I <: I -> R
+# Why does this work?
+# Because Integer is a subtype of Rational: Integer <: Rational.
+# For function types:
+# - The input is contravariant: a function that accepts a *broader* type
+#   can replace one that expects a more specific type.
+# - The output is covariant: a function that returns a *more specific* type
+#   can replace one that returns a broader type.
+#
+# Therefore:
+#   Rational -> Integer  is a subtype of  Integer -> Rational
+#   R -> I  <:  I -> R
 
-def call2(func: Callable[[Rational], Rational], arg: Rational) -> Rational: 
+def call2(func: Callable[[Rational], Rational], arg: Rational) -> Rational:
     return func(arg)
 
 def complex_to_integer(c: Complex) -> Integer:
     return Integer(int(c.float_part))
 
-call2(complex_to_integer, Rational(3,4)) # Ez is OK! mert C -> I  <: R -> R
+# This also works for the same reason:
+# Complex -> Integer  <:  Rational -> Rational
+call2(complex_to_integer, Rational(3, 4))
 
-# Hogy miért van ez? Az LSP miatt:
-# Tegyük fel hogy van egy függvényünk ami egy R -> R függvényünk.
-# eddig használtuk ezt a függvényt valamilyen környezetben, adtunk neki egy Rational-t és visszakapunk egy Rational-t
 
-# ha én ezt egy Integer -> Rational függvénnyel helyettesítem, akkor ez a függvény egy Rational-t fog kapni ami helytelen mert egy típust mindig csak az alosztályaival helyettesíthetünk
-# így láthatjuk hogy ha eddig volt egy Racionálison értelmezett függvény és adok egy integeren értelmezettet akkor azzal szűkítem a befogadható tartományt, ami hiba.
-# Viszont ha adok egy Complexen értelmezettet akkor azzal bővítem a befogadható tartományt, ami OK.
+# Why does all this make sense? Because of the Liskov Substitution Principle (LSP).
+#
+# Imagine a function that expects another function of type Rational -> Rational.
+# It relies on two things:
+#   1) It can safely pass a Rational as input.
+#   2) It will always receive a Rational as output.
+#
+# If we substituted it with a function that accepts only Integer,
+# then it might receive a Rational, which would break the program:
+# the input domain has become *smaller*, which is not allowed.
+#
+# But if it accepts Complex instead, the input domain becomes *larger*,
+# so the function is still safe to call with any Rational.
+#
+# Now consider the return type:
+# If the expected result is a Rational, replacing the function with one
+# that returns a Complex would be unsafe—the caller might not know
+# how to handle a Complex.
+#
+# But if we return an Integer instead, this is safe because Integer
+# is a subtype of Rational. Anywhere a Rational is expected, an Integer fits.
 
-# Nézzük a másik irányt, a visszatérési értéket.
-
-# Eddig ez a függvény egy Racionált adott vissza, ha én ezt egy Complexet visszaadó függvénnyel helyettesítem akkor azzal bővítem a visszatérési érték tartományát,
-#     de ezt a függvény visszatérését valahogy valahol felhasználtam ahol Racionálist vártam, ha Complexet kapok akkor ott azon a ponton nem helyettesíthetném vele.
-# Ellenben ha szükítem a visszatérési értéket Integerre akkor azzal szükítem a visszatérési érték tartományát, ami engedett mivel ahol Racionálist vártam eddig ott az Integer is megfelel. 
+# in the implementation the function in the parameters will be used (or passed throw where it should be used):
+# p : P = params
+# result : R = func(p)
+# So we define the params static type -> can be the same or *broader* the the actual
+# and we dfine the result type which -> needs to be the same or *more specific*

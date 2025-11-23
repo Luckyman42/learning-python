@@ -1,4 +1,3 @@
-
 class Animal:
     def speak(self) -> str:
         return "Some sound"

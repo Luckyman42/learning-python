@@ -6,21 +6,26 @@ def feed(animal: Animal) -> None:
 def feed_all(animals: list[Animal]) -> None:
     pass
 
-feed(Dog()) # Ez OK! mert Dog egy Animal
-feed_all([Dog(),Dog()]) # Ez hiba! A listák invariánsak!
+feed(Dog()) # This OK! because Dog is an Animal
+feed_all([Dog(),Dog()]) # But this... is Wrong,  The lists are invariants!
 
-# Ha list[Dog] <: list[Animal] lenne, akkor ez működne:
+# If list[Dog] <: list[Animal] then this should working:
 dogs : list[Dog] = [Dog(), Dog()]
 
 def add_cat(zoo: list[Animal]) -> None:
     zoo.append(Cat())
 
-add_cat(dogs)  # Ennek hibának kell lennnie!
+add_cat(dogs)  # This is an ERROR. Because the cat can be in danger.
 
-# A tuple típus mivel inmutable ezért kovariáns:
-
+# The tuple type is covariant becuase its inmutable:
 def switch_animals(pair: tuple[Animal, Animal]) -> tuple[Animal, Animal]:
+    # k : Animal = pair[0]
+    # pair[0] = pair[1]  # This is not working you can't set a tuple
+    # pair[1] = k
+    # return pair
     return (pair[1], pair[0])
 
 dog_cat_pair: tuple[Dog, Cat] = (Dog(), Cat())
-switched_pair = switch_animals(dog_cat_pair)  # Ez OK! Mert az eredeti dog_cat_pair nem változik meg, csak egy új tuple jön létre
+switched_pair = switch_animals(dog_cat_pair)  # This is OK! 
+# Because the original dog_cat_pair doesn't change, its a whole new tuple 
+print(dog_cat_pair)

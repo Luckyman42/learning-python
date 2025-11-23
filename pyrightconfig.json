@@ -1,0 +1,9 @@
+{
+"typeCheckingMode": "strict",
+  "reportMissingTypeStubs": "warning",
+  "reportUnknownVariableType": "error",
+  "reportUnknownParameterType": "error",
+  "reportUnknownMemberType": "error",
+  "reportUntypedClassDecorator": "warning",
+  "pythonVersion": "3.13",
+}

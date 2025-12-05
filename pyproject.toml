@@ -1,0 +1,21 @@
+[project]
+name = "pyparadigms"
+version = "0.1.0"
+description = "Learning python"
+readme = "README.md"
+requires-python = "==3.13.*"
+license = {text = "MIT"}
+authors = [
+    { name = "Arpad Szabo", email = "arpad2000@gmail.com" }
+]
+dependencies = [
+    "aiohttp>=3.13.2",
+    "multipledispatch>=1.0.0",
+    "requests>=2.32.5",
+    "uvloop>=0.22.1",
+]
+
+[dependency-groups]
+dev = [
+    "py-spy>=0.4.1",
+]

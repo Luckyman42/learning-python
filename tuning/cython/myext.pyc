@@ -1,0 +1,6 @@
+cpdef long long fast_sum(list items):
+    cdef long long total = 0
+    cdef int i
+    for i in range(len(items)):
+        total += items[i]
+    return total
